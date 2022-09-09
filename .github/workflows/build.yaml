@@ -10,6 +10,9 @@ on:
 
 jobs:
   build-jdk:
+    strategy:
+      matrix:
+        debug-level: ["slowdebug", "fastdebug", "release"]
     name: Build OpenJDK mainline fork with MMTk
     runs-on: ubuntu-22.04
     steps:
@@ -28,7 +31,6 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-          override: true
       - name: Install build dependencies
         run: >
           curl "https://packages.adoptium.net/artifactory/api/gpg/key/public" | sudo tee /etc/apt/keyrings/adoptium.asc &&
@@ -47,13 +49,13 @@ jobs:
           libfontconfig1-dev
           temurin-18-jdk
       - name: Configure OpenJDK
-        run: sh configure --disable-warnings-as-errors --with-debug-level=slowdebug
+        run: sh configure --disable-warnings-as-errors --with-debug-level=${{ matrix.debug-level }}
         working-directory: ./jdk-mmtk
       - name: Build OpenJDK
-        run: make CONF=linux-x86_64-server-slowdebug THIRD_PARTY_HEAP=$PWD/../mmtk-openjdk-riscv/openjdk product-bundles
+        run: make CONF=linux-x86_64-server-${{ matrix.debug-level }} THIRD_PARTY_HEAP=$PWD/../mmtk-openjdk-riscv/openjdk product-bundles
         working-directory: ./jdk-mmtk
       - name: Upload build
         uses: actions/upload-artifact@v3
         with:
-          name: slowdebug-bundles
-          path: ./jdk-mmtk/build/linux-x86_64-server-slowdebug/bundles/*
+          name: ${{ matrix.debug-level }}-bundles
+          path: ./jdk-mmtk/build/linux-x86_64-server-${{ matrix.debug-level }}/bundles/*
