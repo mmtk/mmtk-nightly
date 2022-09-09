@@ -62,9 +62,17 @@ jobs:
       - name: Find bundle file
         id: find-file
         run: echo "::set-output name=bundle-name::$(ls ./jdk-mmtk/build/linux-x86_64-server-${{ matrix.debug-level }}/bundles/*bin-${{ matrix.debug-level }}.tar.gz)"
+      - name: Install latest rclone
+        run: curl https://rclone.org/install.sh | sudo bash
       - name: Upload bundle
         run: >
-          curl https://mmtk-nightly.zcai.org/api/upload/caizixian-jdk-mmtk/caizixian-jdk-mmtk-x86_64-server-${{ matrix.debug-level }}.tar.gz
-          --upload-file ${{ steps.find-file.outputs.bundle-name }}
-          --header "CF-Access-Client-Id: ${{ secrets.CF_ACCESS_CLIENT_ID }}"
-          --header "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}"
+          rclone
+          --s3-provider Cloudflare
+          --s3-access-key-id ${{ secrets.S3_ACCESS_KEY_ID }}
+          --s3-secret-access-key ${{ secrets.S3_SECRET_ACCESS_KEY }}
+          --s3-acl private
+          --s3-endpoint https://b3bb5db1cd7d6b590bb0bb68f8433a0e.r2.cloudflarestorage.com
+          copyto
+          -P
+          ${{ steps.find-file.outputs.bundle-name }}
+          :s3:mmtk-nightly/caizixian-jdk-mmtk/caizixian-jdk-mmtk-x86_64-server-${{ matrix.debug-level }}.tar.gz
