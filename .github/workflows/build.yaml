@@ -1,0 +1,55 @@
+on:
+  workflow_dispatch: 
+  schedule:
+    - cron: '0 0 * * *' # daily at 00:00
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  build_jdk:
+    name: Build OpenJDK mainline fork with MMTk
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout JDK mainline fork
+        uses: actions/checkout@v3
+        with:
+          repository: caizixian/jdk-mmtk
+      - name: Checkout MMTk/OpenJDK binding fork
+        uses: actions/checkout@v3
+        with:
+          repository: caizixian/mmtk-openjdk-riscv
+      - name: Install latest stable Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - name: Install build dependencies
+        run: >
+          curl "https://packages.adoptium.net/artifactory/api/gpg/key/public" | sudo tee /etc/apt/keyrings/adoptium.asc &&
+          echo "deb [signed-by=/etc/apt/keyrings/adoptium.asc] https://packages.adoptium.net/artifactory/deb jammy main" | sudo tee /etc/apt/sources.list.d/packages_adoptium_net_artifactory_deb.list &&
+          sudo apt-get update &&
+          sudo apt-get install -y
+          build-essential
+          libfreetype6-dev
+          libcups2-dev
+          libx11-dev libxext-dev libxrender-dev libxrandr-dev libxtst-dev libxt-dev
+          libasound2-dev
+          libffi-dev
+          autoconf
+          zip
+          unzip
+          libfontconfig1-dev
+          temurin-18-jdk
+      - name: Configure OpenJDK
+        run: sh configure --disable-warnings-as-errors --with-debug-level=slowdebug
+        working_directory: ./jdk-mmtk
+      - name: Build OpenJDK
+        run: make CONF=linux-x86_64-server-slowdebug THIRD_PARTY_HEAP=$PWD/../mmtk-openjdk-riscv/openjdk product-bundles
+        working_directory: ./jdk-mmtk
+      - name: Upload build
+        with:
+          name: slowdebug-bundles
+          path: ./jdk-mmtk/build/linux-x86_64-server-slowdebug/bundles/*
+      
