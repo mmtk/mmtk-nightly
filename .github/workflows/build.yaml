@@ -44,12 +44,11 @@ jobs:
           temurin-18-jdk
       - name: Configure OpenJDK
         run: sh configure --disable-warnings-as-errors --with-debug-level=slowdebug
-        working_directory: ./jdk-mmtk
+        working-directory: ./jdk-mmtk
       - name: Build OpenJDK
         run: make CONF=linux-x86_64-server-slowdebug THIRD_PARTY_HEAP=$PWD/../mmtk-openjdk-riscv/openjdk product-bundles
-        working_directory: ./jdk-mmtk
+        working-directory: ./jdk-mmtk
       - name: Upload build
         with:
           name: slowdebug-bundles
           path: ./jdk-mmtk/build/linux-x86_64-server-slowdebug/bundles/*
-      
