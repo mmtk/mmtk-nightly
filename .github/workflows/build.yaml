@@ -1,3 +1,5 @@
+name: 'Build JDK'
+
 on:
   workflow_dispatch: 
   schedule:
@@ -7,7 +9,7 @@ on:
       - 'master'
 
 jobs:
-  build_jdk:
+  build-jdk:
     name: Build OpenJDK mainline fork with MMTk
     runs-on: ubuntu-22.04
     steps:
@@ -49,6 +51,7 @@ jobs:
         run: make CONF=linux-x86_64-server-slowdebug THIRD_PARTY_HEAP=$PWD/../mmtk-openjdk-riscv/openjdk product-bundles
         working-directory: ./jdk-mmtk
       - name: Upload build
+        uses: actions/upload-artifact@v3
         with:
           name: slowdebug-bundles
           path: ./jdk-mmtk/build/linux-x86_64-server-slowdebug/bundles/*
