@@ -61,7 +61,7 @@ jobs:
           path: ./jdk-mmtk/build/linux-x86_64-server-${{ matrix.debug-level }}/bundles/*
       - name: Find bundle file
         id: find-file
-        run: echo "::set-output name=bundle-name::$(ls ./jdk-mmtk/build/linux-x86_64-server-${{ matrix.debug-level }}/bundles/*bin-${{ matrix.debug-level }}.tar.gz)"
+        run: echo "::set-output name=bundle-name::$(ls ./jdk-mmtk/build/linux-x86_64-server-${{ matrix.debug-level }}/bundles/*.tar.gz | grep -v -e symbols -e demos)"
       - name: Install latest rclone
         run: curl https://rclone.org/install.sh | sudo bash
       - name: Upload bundle
