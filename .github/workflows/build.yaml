@@ -54,8 +54,17 @@ jobs:
       - name: Build OpenJDK
         run: make CONF=linux-x86_64-server-${{ matrix.debug-level }} THIRD_PARTY_HEAP=$PWD/../mmtk-openjdk-riscv/openjdk product-bundles
         working-directory: ./jdk-mmtk
-      - name: Upload build
+      - name: Upload as artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.debug-level }}-bundles
           path: ./jdk-mmtk/build/linux-x86_64-server-${{ matrix.debug-level }}/bundles/*
+      - name: Find bundle file
+        id: find-file
+        run: echo "::set-output name=bundle-name::$(ls ./jdk-mmtk/build/linux-x86_64-server-${{ matrix.debug-level }}/bundles/*bin-${{ matrix.debug-level }}.tar.gz)"
+      - name: Upload bundle
+        run: >
+          curl https://mmtk-nightly.zcai.org/api/upload/caizixian-jdk-mmtk/caizixian-jdk-mmtk-x86_64-server-${{ matrix.debug-level }}.tar.gz
+          --upload-file ${{ steps.find-file.outputs.bundle-name }}
+          --header "CF-Access-Client-Id: ${{ secrets.CF_ACCESS_CLIENT_ID }}"
+          --header "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}"
