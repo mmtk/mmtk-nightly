@@ -62,7 +62,7 @@ jobs:
       - name: Upload as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.third-party-heap }}${{ matrix.debug-level }}-bundles
+          name: ${{ matrix.debug-level }}${{ matrix.third-party-heap }}-bundles
           path: ./openjdk/build/linux-x86_64-normal-server-${{ matrix.debug-level }}/bundles/*
       - name: Find bundle file
         id: find-file
