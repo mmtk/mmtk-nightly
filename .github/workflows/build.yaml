@@ -1,18 +1,16 @@
-name: 'Build JDK'
+name: 'Build GitHub caizixian/jdk-mmtk'
 
 on:
   workflow_dispatch: 
   schedule:
     - cron: '0 0 * * *' # daily at 00:00
-  push:
-    branches:
-      - 'master'
 
 jobs:
   build-jdk:
     strategy:
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
+        third-party-heap: ["", "-tph"]
     name: Build OpenJDK mainline fork with MMTk
     runs-on: ubuntu-22.04
     steps:
@@ -52,27 +50,24 @@ jobs:
         run: sh configure --disable-warnings-as-errors --with-debug-level=${{ matrix.debug-level }}
         working-directory: ./jdk-mmtk
       - name: Build OpenJDK
+        run: make CONF=linux-x86_64-server-${{ matrix.debug-level }} product-bundles
+        working-directory: ./jdk-mmtk
+        if: ${{ matrix.third-party-heap == "" }}
+      - name: Build OpenJDK Third Party Heap
         run: make CONF=linux-x86_64-server-${{ matrix.debug-level }} THIRD_PARTY_HEAP=$PWD/../mmtk-openjdk-riscv/openjdk product-bundles
         working-directory: ./jdk-mmtk
+        if: ${{ matrix.third-party-heap == "-tph" }}
       - name: Upload as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.debug-level }}-bundles
+          name: ${{ matrix.third-party-heap }}${{ matrix.debug-level }}-bundles
           path: ./jdk-mmtk/build/linux-x86_64-server-${{ matrix.debug-level }}/bundles/*
       - name: Find bundle file
         id: find-file
         run: echo "::set-output name=bundle-name::$(ls ./jdk-mmtk/build/linux-x86_64-server-${{ matrix.debug-level }}/bundles/*.tar.gz | grep -v -e symbols -e demos)"
-      - name: Install latest rclone
-        run: curl https://rclone.org/install.sh | sudo bash
       - name: Upload bundle
         run: >
-          rclone
-          --s3-provider Cloudflare
-          --s3-access-key-id ${{ secrets.S3_ACCESS_KEY_ID }}
-          --s3-secret-access-key ${{ secrets.S3_SECRET_ACCESS_KEY }}
-          --s3-acl private
-          --s3-endpoint https://b3bb5db1cd7d6b590bb0bb68f8433a0e.r2.cloudflarestorage.com
-          copyto
-          -P
-          ${{ steps.find-file.outputs.bundle-name }}
-          :s3:mmtk-nightly/caizixian-jdk-mmtk/caizixian-jdk-mmtk-x86_64-server-${{ matrix.debug-level }}.tar.gz
+          curl -L https://mmtk-nightly.zcai.org/api/upload/caizixian-jdk-mmtk/caizixian-jdk-mmtk-x86_64-server${{ matrix.third-party-heap }}-${{ matrix.debug-level }}.tar.gz
+          --upload-file ${{ steps.find-file.outputs.bundle-name }}
+          --header "CF-Access-Client-Id: ${{ secrets.CF_ACCESS_CLIENT_ID }}"
+          --header "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}"
