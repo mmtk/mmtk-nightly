@@ -1,0 +1,75 @@
+name: 'Build GitHub mmtk/openjdk'
+
+on:
+  workflow_dispatch: 
+  schedule:
+    - cron: '0 0 * * *' # daily at 00:00
+
+jobs:
+  build-jdk:
+    strategy:
+      matrix:
+        debug-level: ["slowdebug", "fastdebug", "release"]
+        third-party-heap: ["", "-tph"]
+    name: Build MMTk/OpenJDK
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout MMTk/OpenJDK binding
+        uses: actions/checkout@v3
+        with:
+          repository: mmtk/mmtk-openjdk
+          path: ./mmtk-openjdk
+      - name: Extract OpenJDK revision
+        id: extract-openjdk-revision
+        run: echo "::set-output name=openjdk-revision::$(sed -n 's/^openjdk_version.=."\(.*\)"$/\1/p' < mmtk-openjdk/mmtk/Cargo.toml)"
+      - name: Checkout JDK MMTk fork
+        uses: actions/checkout@v3
+        with:
+          repository: mmtk/openjdk
+          path: ./openjdk
+          ref: ${{ steps.extract-openjdk-revision.outputs.openjdk-revision }}
+      - name: Install latest stable Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+      - name: Install build dependencies
+        run: >
+          sudo apt-get update &&
+          sudo apt-get install -y
+          build-essential
+          libfreetype6-dev
+          libcups2-dev
+          libx11-dev libxext-dev libxrender-dev libxrandr-dev libxtst-dev libxt-dev
+          libasound2-dev
+          libffi-dev
+          autoconf
+          zip
+          unzip
+          libfontconfig1-dev
+          pigz
+      - name: Configure OpenJDK
+        run: sh configure --disable-warnings-as-errors --with-debug-level=${{ matrix.debug-level }}
+        working-directory: ./openjdk
+      - name: Build OpenJDK
+        run: make CONF=linux-x86_64-normal-server-${{ matrix.debug-level }} product-bundles
+        working-directory: ./openjdk
+        if: ${{ matrix.third-party-heap == "" }}
+      - name: Build OpenJDK Third Party Heap
+        run: make CONF=linux-x86_64-normal-server-${{ matrix.debug-level }} THIRD_PARTY_HEAP=$PWD/../mmtk-openjdk-riscv/openjdk product-bundles
+        working-directory: ./openjdk
+        if: ${{ matrix.third-party-heap == "-tph" }}
+      - name: Upload as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.third-party-heap }}${{ matrix.debug-level }}-bundles
+          path: ./openjdk/build/linux-x86_64-normal-server-${{ matrix.debug-level }}/bundles/*
+      - name: Find bundle file
+        id: find-file
+        run: echo "::set-output name=bundle-name::$(ls ./openjdk/build/linux-x86_64-normal-server-${{ matrix.debug-level }}/bundles/*.tar.gz | grep -v -e symbols -e demos)"
+      - name: Upload bundle
+        run: >
+          curl -L https://mmtk-nightly.zcai.org/api/upload/mmtk-openjdk/mmtk-openjdk-x86_64-server${{ matrix.third-party-heap }}-${{ matrix.debug-level }}.tar.gz
+          --upload-file ${{ steps.find-file.outputs.bundle-name }}
+          --header "CF-Access-Client-Id: ${{ secrets.CF_ACCESS_CLIENT_ID }}"
+          --header "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}"
