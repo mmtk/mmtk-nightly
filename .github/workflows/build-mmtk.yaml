@@ -54,11 +54,11 @@ jobs:
       - name: Build OpenJDK
         run: make CONF=linux-x86_64-normal-server-${{ matrix.debug-level }} product-bundles
         working-directory: ./openjdk
-        if: ${{ matrix.third-party-heap == "" }}
+        if: ${{ matrix.third-party-heap == '' }}
       - name: Build OpenJDK Third Party Heap
         run: make CONF=linux-x86_64-normal-server-${{ matrix.debug-level }} THIRD_PARTY_HEAP=$PWD/../mmtk-openjdk-riscv/openjdk product-bundles
         working-directory: ./openjdk
-        if: ${{ matrix.third-party-heap == "-tph" }}
+        if: ${{ matrix.third-party-heap == '-tph' }}
       - name: Upload as artifact
         uses: actions/upload-artifact@v3
         with:
