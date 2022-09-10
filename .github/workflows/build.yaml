@@ -67,7 +67,8 @@ jobs:
         run: echo "::set-output name=bundle-name::$(ls ./jdk-mmtk/build/linux-x86_64-server-${{ matrix.debug-level }}/bundles/*.tar.gz | grep -v -e symbols -e demos)"
       - name: Upload bundle
         run: >
-          curl -L https://mmtk-nightly.zcai.org/api/upload/caizixian-jdk-mmtk/caizixian-jdk-mmtk-x86_64-server${{ matrix.third-party-heap }}-${{ matrix.debug-level }}.tar.gz
-          --upload-file ${{ steps.find-file.outputs.bundle-name }}
+          curl $(curl -Ls -o /dev/null -w %{url_effective} -X PUT
           --header "CF-Access-Client-Id: ${{ secrets.CF_ACCESS_CLIENT_ID }}"
           --header "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}"
+          https://mmtk-nightly.zcai.org/api/upload/caizixian-jdk-mmtk/caizixian-jdk-mmtk-x86_64-server${{ matrix.third-party-heap }}-${{ matrix.debug-level }}.tar.gz)
+          --upload-file ${{ steps.find-file.outputs.bundle-name }}
