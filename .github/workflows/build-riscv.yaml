@@ -51,7 +51,7 @@ jobs:
           cpp-riscv64-linux-gnu g++-riscv64-linux-gnu
           gcc-riscv64-linux-gnu gcc-riscv64-unknown-elf
       - name: RISC-V sysroot
-        run: sudo debootstrap --verbose --arch=riscv64 --include=fakeroot,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev,libffi-dev --resolve-deps jammy ./sysroot-riscv64 http://archive.ubuntu.com/ubuntu/
+        run: sudo debootstrap --verbose --arch=riscv64 --include=fakeroot,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev,libffi-dev --resolve-deps jammy ./sysroot-riscv64 http://ports.ubuntu.com/ubuntu-ports/
       - name: Configure OpenJDK
         run: sh configure --openjdk-target=riscv64-linux-gnu --disable-warnings-as-errors --with-debug-level=${{ matrix.debug-level }}
         working-directory: ./jdk-mmtk
