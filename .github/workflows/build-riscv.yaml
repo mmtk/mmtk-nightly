@@ -1,0 +1,80 @@
+name: 'Build GitHub caizixian/jdk-mmtk cross-compile riscv64'
+
+on:
+  workflow_dispatch: 
+  schedule:
+    - cron: '0 0 * * *' # daily at 00:00
+
+jobs:
+  build-jdk:
+    strategy:
+      matrix:
+        debug-level: ["slowdebug", "fastdebug", "release"]
+        third-party-heap: [""]
+    name: Build OpenJDK mainline fork with MMTk
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout JDK mainline fork
+        uses: actions/checkout@v3
+        with:
+          repository: caizixian/jdk-mmtk
+          path: ./jdk-mmtk
+      - name: Checkout MMTk/OpenJDK binding fork
+        uses: actions/checkout@v3
+        with:
+          repository: caizixian/mmtk-openjdk-riscv
+          path: ./mmtk-openjdk-riscv
+      - name: Install latest stable Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+      - name: Install build dependencies
+        run: >
+          curl "https://packages.adoptium.net/artifactory/api/gpg/key/public" | sudo tee /etc/apt/keyrings/adoptium.asc &&
+          echo "deb [signed-by=/etc/apt/keyrings/adoptium.asc] https://packages.adoptium.net/artifactory/deb jammy main" | sudo tee /etc/apt/sources.list.d/packages_adoptium_net_artifactory_deb.list &&
+          sudo apt-get update &&
+          sudo apt-get install -y
+          build-essential
+          libfreetype6-dev
+          libcups2-dev
+          libx11-dev libxext-dev libxrender-dev libxrandr-dev libxtst-dev libxt-dev
+          libasound2-dev
+          libffi-dev
+          autoconf
+          zip
+          unzip
+          libfontconfig1-dev
+          temurin-18-jdk
+          qemu-user qemu-user-static debootstrap
+          binutils-riscv64-linux-gnu binutils-riscv64-unknown-elf
+          cpp-riscv64-linux-gnu g++-riscv64-linux-gnu
+          gcc-riscv64-linux-gnu gcc-riscv64-unknown-elf
+      - name: RISC-V sysroot
+        run: sudo debootstrap --verbose --arch=riscv64 --include=fakeroot,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev,libffi-dev --resolve-deps jammy ./sysroot-riscv64 http://archive.ubuntu.com/ubuntu/
+      - name: Configure OpenJDK
+        run: sh configure --openjdk-target=riscv64-linux-gnu --disable-warnings-as-errors --with-debug-level=${{ matrix.debug-level }}
+        working-directory: ./jdk-mmtk
+      - name: Build OpenJDK
+        run: make CONF=linux-riscv64-server-${{ matrix.debug-level }} product-bundles
+        working-directory: ./jdk-mmtk
+        if: ${{ matrix.third-party-heap == '' }}
+      - name: Build OpenJDK Third Party Heap
+        run: make CONF=linux-riscv64-server-${{ matrix.debug-level }} THIRD_PARTY_HEAP=$PWD/../mmtk-openjdk-riscv/openjdk product-bundles
+        working-directory: ./jdk-mmtk
+        if: ${{ matrix.third-party-heap == '-tph' }}
+      - name: Upload as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.debug-level }}${{ matrix.third-party-heap }}-bundles
+          path: ./jdk-mmtk/build/linux-riscv64-server-${{ matrix.debug-level }}/bundles/*
+      - name: Find bundle file
+        id: find-file
+        run: echo "::set-output name=bundle-name::$(ls ./jdk-mmtk/build/linux-riscv64-server-${{ matrix.debug-level }}/bundles/*.tar.gz | grep -v -e symbols -e demos)"
+      - name: Upload bundle
+        run: >
+          curl $(curl -Ls -o /dev/null -w %{url_effective} -X PUT
+          --header "CF-Access-Client-Id: ${{ secrets.CF_ACCESS_CLIENT_ID }}"
+          --header "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}"
+          https://mmtk-nightly.zcai.org/api/upload/caizixian-jdk-mmtk/caizixian-jdk-mmtk-riscv64-server${{ matrix.third-party-heap }}-${{ matrix.debug-level }}.tar.gz)
+          --upload-file ${{ steps.find-file.outputs.bundle-name }}
