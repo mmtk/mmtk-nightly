@@ -11,6 +11,7 @@ jobs:
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
         third-party-heap: [""]
+        variant: ["server", "zero"]
     name: Build OpenJDK mainline fork with MMTk
     runs-on: ubuntu-22.04
     steps:
@@ -56,25 +57,25 @@ jobs:
         run: sh configure --openjdk-target=riscv64-linux-gnu --disable-warnings-as-errors --with-sysroot=../sysroot-riscv64/ --with-debug-level=${{ matrix.debug-level }}
         working-directory: ./jdk-mmtk
       - name: Build OpenJDK
-        run: make CONF=linux-riscv64-server-${{ matrix.debug-level }} product-bundles
+        run: make CONF=linux-riscv64-${{ matrix.variant }}-${{ matrix.debug-level }} product-bundles
         working-directory: ./jdk-mmtk
         if: ${{ matrix.third-party-heap == '' }}
       - name: Build OpenJDK Third Party Heap
-        run: make CONF=linux-riscv64-server-${{ matrix.debug-level }} THIRD_PARTY_HEAP=$PWD/../mmtk-openjdk-riscv/openjdk product-bundles
+        run: make CONF=linux-riscv64-${{ matrix.variant }}-${{ matrix.debug-level }} THIRD_PARTY_HEAP=$PWD/../mmtk-openjdk-riscv/openjdk product-bundles
         working-directory: ./jdk-mmtk
         if: ${{ matrix.third-party-heap == '-tph' }}
       - name: Upload as artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.debug-level }}${{ matrix.third-party-heap }}-bundles
-          path: ./jdk-mmtk/build/linux-riscv64-server-${{ matrix.debug-level }}/bundles/*
+          path: ./jdk-mmtk/build/linux-riscv64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*
       - name: Find bundle file
         id: find-file
-        run: echo "::set-output name=bundle-name::$(ls ./jdk-mmtk/build/linux-riscv64-server-${{ matrix.debug-level }}/bundles/*.tar.gz | grep -v -e symbols -e demos)"
+        run: echo "::set-output name=bundle-name::$(ls ./jdk-mmtk/build/linux-riscv64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*.tar.gz | grep -v -e symbols -e demos)"
       - name: Upload bundle
         run: >
           curl $(curl -Ls -o /dev/null -w %{url_effective} -X PUT
           --header "CF-Access-Client-Id: ${{ secrets.CF_ACCESS_CLIENT_ID }}"
           --header "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}"
-          https://mmtk-nightly.zcai.org/api/upload/caizixian-jdk-mmtk/caizixian-jdk-mmtk-riscv64-server${{ matrix.third-party-heap }}-${{ matrix.debug-level }}.tar.gz)
+          https://mmtk-nightly.zcai.org/api/upload/caizixian-jdk-mmtk/caizixian-jdk-mmtk-riscv64-${{ matrix.variant }}${{ matrix.third-party-heap }}-${{ matrix.debug-level }}.tar.gz)
           --upload-file ${{ steps.find-file.outputs.bundle-name }}
