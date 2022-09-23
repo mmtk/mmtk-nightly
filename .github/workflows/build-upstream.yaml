@@ -11,7 +11,7 @@ jobs:
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
         variant: ["server", "zero"]
-    name: Build OpenJDK mainline
+    name: openjdk/jdk riscv64
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout JDK mainline
@@ -68,7 +68,7 @@ jobs:
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
         variant: ["server", "zero"]
-    name: Build OpenJDK mainline
+    name: openjdk/jdk x86_64
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout JDK mainline

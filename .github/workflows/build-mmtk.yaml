@@ -11,7 +11,7 @@ jobs:
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
         third-party-heap: ["", "-tph"]
-    name: Build MMTk/OpenJDK
+    name: mmtk/openjdk x86_64
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout MMTk/OpenJDK binding
