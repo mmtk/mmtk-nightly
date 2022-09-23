@@ -67,7 +67,7 @@ jobs:
       - name: Upload as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.debug-level }}${{ matrix.third-party-heap }}-bundles
+          name: riscv64-${{ matrix.variant }}-${{ matrix.debug-level }}${{ matrix.third-party-heap }}-bundles
           path: ./jdk-mmtk/build/linux-riscv64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*
       - name: Find bundle file
         id: find-file
@@ -134,7 +134,7 @@ jobs:
       - name: Upload as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.debug-level }}${{ matrix.third-party-heap }}-bundles
+          name: x86_64-${{ matrix.variant }}-${{ matrix.debug-level }}${{ matrix.third-party-heap }}-bundles
           path: ./jdk-mmtk/build/linux-x86_64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*
       - name: Find bundle file
         id: find-file
