@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
-        third-party-heap: [""]
+        third-party-heap: ["", "-tph"]
         variant: ["server", "zero"]
     name: caizixian/jdk-mmtk riscv64
     runs-on: ubuntu-22.04
