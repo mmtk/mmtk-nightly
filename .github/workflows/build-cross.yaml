@@ -1,0 +1,28 @@
+name: 'Test Rust cross'
+
+on:
+  workflow_dispatch: 
+
+jobs:
+  build-cross:
+    name: rust cross
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout MMTk
+        uses: actions/checkout@v3
+        with:
+          repository: mmtk/mmtk-core
+          path: ./mmtk-core
+      - name: Install latest stable Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+      - name: Install cross
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: cross
+      - name: Build mmtk
+        run: cross build --target riscv64gc-unknown-linux-gnu
+        working-directory: ./mmtk-core
