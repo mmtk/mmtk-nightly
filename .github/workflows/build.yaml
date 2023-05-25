@@ -51,7 +51,7 @@ jobs:
           zip
           unzip
           libfontconfig1-dev
-          temurin-19-jdk
+          temurin-20-jdk
           qemu-user qemu-user-static debootstrap
           binutils-riscv64-linux-gnu binutils-riscv64-unknown-elf
           cpp-riscv64-linux-gnu g++-riscv64-linux-gnu
