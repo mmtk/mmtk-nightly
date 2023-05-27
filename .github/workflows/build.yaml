@@ -124,7 +124,7 @@ jobs:
           zip
           unzip
           libfontconfig1-dev
-          temurin-19-jdk
+          temurin-20-jdk
       - name: Configure OpenJDK
         run: sh configure --disable-warnings-as-errors --with-debug-level=${{ matrix.debug-level }} --with-jvm-variants=${{ matrix.variant }}
         working-directory: ./jdk-mmtk
