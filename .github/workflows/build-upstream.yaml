@@ -55,7 +55,7 @@ jobs:
           path: ./jdk/build/linux-riscv64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*
       - name: Find bundle file
         id: find-file
-        run: echo "::set-output name=bundle-name::$(ls ./jdk/build/linux-riscv64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*.tar.gz | grep -v -e symbols -e demos)"
+        run: echo "bundle-name=$(ls ./jdk/build/linux-riscv64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*.tar.gz | grep -v -e symbols -e demos)" >> $GITHUB_OUTPUT
       - name: Upload bundle
         run: >
           curl $(curl -Ls -o /dev/null -w %{url_effective} -X PUT
@@ -106,7 +106,7 @@ jobs:
           path: ./jdk/build/linux-x86_64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*
       - name: Find bundle file
         id: find-file
-        run: echo "::set-output name=bundle-name::$(ls ./jdk/build/linux-x86_64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*.tar.gz | grep -v -e symbols -e demos)"
+        run: echo "bundle-name=$(ls ./jdk/build/linux-x86_64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*.tar.gz | grep -v -e symbols -e demos)" >> $GITHUB_OUTPUT
       - name: Upload bundle
         run: >
           curl $(curl -Ls -o /dev/null -w %{url_effective} -X PUT
