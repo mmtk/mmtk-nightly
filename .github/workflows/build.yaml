@@ -27,12 +27,12 @@ jobs:
           path: ./mmtk-openjdk
           ref: jdk-mainline-mmtk
       - name: Install latest stable Rust toolchain
-        uses: actions-rs/toolchain@v1
+        uses: caizixian/toolchain@v1.0.8
         with:
           profile: minimal
           toolchain: stable
       - name: Install cross
-        uses: actions-rs/cargo@v1
+        uses: caizixian/cargo@v1.0.4
         with:
           command: install
           args: cross
@@ -106,7 +106,7 @@ jobs:
           path: ./mmtk-openjdk
           ref: jdk-mainline-mmtk
       - name: Install latest stable Rust toolchain
-        uses: actions-rs/toolchain@v1
+        uses: caizixian/toolchain@v1.0.8
         with:
           profile: minimal
           toolchain: stable
