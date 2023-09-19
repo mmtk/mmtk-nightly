@@ -114,3 +114,60 @@ jobs:
           --header "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}"
           https://mmtk-nightly.zcai.org/api/upload/openjdk-jdk/openjdk-jdk-x86_64-${{ matrix.variant }}-${{ matrix.debug-level }}.tar.gz)
           --upload-file ${{ steps.find-file.outputs.bundle-name }}
+  build-aarch64:
+    strategy:
+      matrix:
+        debug-level: ["slowdebug", "fastdebug", "release"]
+        variant: ["server", "zero"]
+    name: openjdk/jdk aarch64
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout JDK mainline
+        uses: actions/checkout@v3
+        with:
+          repository: openjdk/jdk
+          path: ./jdk
+      - name: Install build dependencies
+        run: >
+          curl "https://packages.adoptium.net/artifactory/api/gpg/key/public" | sudo tee /etc/apt/keyrings/adoptium.asc &&
+          echo "deb [signed-by=/etc/apt/keyrings/adoptium.asc] https://packages.adoptium.net/artifactory/deb jammy main" | sudo tee /etc/apt/sources.list.d/packages_adoptium_net_artifactory_deb.list &&
+          sudo apt-get update &&
+          sudo apt-get install -y
+          build-essential
+          libfreetype6-dev
+          libcups2-dev
+          libx11-dev libxext-dev libxrender-dev libxrandr-dev libxtst-dev libxt-dev
+          libasound2-dev
+          libffi-dev
+          autoconf
+          zip
+          unzip
+          libfontconfig1-dev
+          temurin-20-jdk
+          qemu-user qemu-user-static debootstrap
+          binutils-aarch64-linux-gnu
+          cpp-aarch64-linux-gnu g++-aarch64-linux-gnu
+          gcc-aarch64-linux-gnu
+      - name: RISC-V sysroot
+        run: sudo debootstrap --verbose --arch=arm64 --include=fakeroot,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev,libffi-dev --resolve-deps jammy ./sysroot-aarch64 http://ports.ubuntu.com/ubuntu-ports/
+      - name: Configure OpenJDK
+        run: sh configure --disable-warnings-as-errors --with-debug-level=${{ matrix.debug-level }} --with-jvm-variants=${{ matrix.variant }} --openjdk-target=aarch64-linux-gnu --with-sysroot=../sysroot-aarch64/
+        working-directory: ./jdk
+      - name: Build OpenJDK
+        run: make CONF=linux-aarch64-${{ matrix.variant }}-${{ matrix.debug-level }} product-bundles
+        working-directory: ./jdk
+      - name: Upload as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: aarch64-${{ matrix.variant }}-${{ matrix.debug-level }}-bundles
+          path: ./jdk/build/linux-aarch64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*
+      - name: Find bundle file
+        id: find-file
+        run: echo "bundle-name=$(ls ./jdk/build/linux-aarch64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*.tar.gz | grep -v -e symbols -e demos)" >> $GITHUB_OUTPUT
+      - name: Upload bundle
+        run: >
+          curl $(curl -Ls -o /dev/null -w %{url_effective} -X PUT
+          --header "CF-Access-Client-Id: ${{ secrets.CF_ACCESS_CLIENT_ID }}"
+          --header "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}"
+          https://mmtk-nightly.zcai.org/api/upload/openjdk-jdk/openjdk-jdk-aarch64-${{ matrix.variant }}-${{ matrix.debug-level }}.tar.gz)
+          --upload-file ${{ steps.find-file.outputs.bundle-name }}
