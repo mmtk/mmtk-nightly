@@ -8,6 +8,7 @@ on:
 jobs:
   build-jdk:
     strategy:
+      fail-fast: false
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
         third-party-heap: ["", "-tph"]

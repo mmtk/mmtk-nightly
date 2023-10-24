@@ -7,6 +7,7 @@ on:
 
 jobs:
   build-riscv:
+    fail-fast: false
     strategy:
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
@@ -67,6 +68,7 @@ jobs:
           --upload-file ${{ steps.find-file.outputs.bundle-name }}
   build-x86:
     strategy:
+      fail-fast: false
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
         variant: ["server", "zero"]
@@ -118,6 +120,7 @@ jobs:
           --upload-file ${{ steps.find-file.outputs.bundle-name }}
   build-aarch64:
     strategy:
+      fail-fast: false
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
         variant: ["server", "zero"]

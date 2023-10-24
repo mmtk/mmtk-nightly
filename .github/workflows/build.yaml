@@ -8,6 +8,7 @@ on:
 jobs:
   build-riscv:
     strategy:
+      fail-fast: false
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
         third-party-heap: ["", "-tph"]
@@ -89,6 +90,7 @@ jobs:
           --upload-file ${{ steps.find-file.outputs.bundle-name }}
   build-aarch64:
     strategy:
+      fail-fast: false
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
         third-party-heap: ["", "-tph"]
@@ -169,6 +171,7 @@ jobs:
           https://mmtk-nightly.zcai.org/api/upload/mmtk-openjdk-mainline/mmtk-openjdk-aarch64-${{ matrix.variant }}${{ matrix.third-party-heap }}-${{ matrix.debug-level }}.tar.gz)
           --upload-file ${{ steps.find-file.outputs.bundle-name }}
   build-x86:
+    fail-fast: false
     strategy:
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
