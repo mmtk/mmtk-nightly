@@ -7,8 +7,8 @@ on:
 
 jobs:
   build-riscv:
-    fail-fast: false
     strategy:
+      fail-fast: false
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
         variant: ["server", "zero"]
