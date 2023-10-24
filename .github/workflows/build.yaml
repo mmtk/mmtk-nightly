@@ -87,6 +87,87 @@ jobs:
           --header "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}"
           https://mmtk-nightly.zcai.org/api/upload/mmtk-openjdk-mainline/mmtk-openjdk-riscv64-${{ matrix.variant }}${{ matrix.third-party-heap }}-${{ matrix.debug-level }}.tar.gz)
           --upload-file ${{ steps.find-file.outputs.bundle-name }}
+  build-aarch64:
+    strategy:
+      matrix:
+        debug-level: ["slowdebug", "fastdebug", "release"]
+        third-party-heap: ["", "-tph"]
+        variant: ["server", "zero"]
+    name: mmtk/jdk riscv64
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout JDK mainline fork
+        uses: actions/checkout@v3
+        with:
+          repository: mmtk/jdk
+          path: ./jdk-mmtk
+      - name: Checkout MMTk/OpenJDK binding fork
+        uses: actions/checkout@v3
+        with:
+          repository: mmtk/mmtk-openjdk
+          path: ./mmtk-openjdk
+          ref: jdk-mainline-mmtk
+      - name: Install latest stable Rust toolchain
+        uses: caizixian/toolchain@v1.0.8
+        with:
+          profile: minimal
+          toolchain: stable
+      - name: Install cross
+        uses: caizixian/cargo@v1.0.4
+        with:
+          command: install
+          args: cross
+      - name: Install build dependencies
+        run: >
+          curl "https://packages.adoptium.net/artifactory/api/gpg/key/public" | sudo tee /etc/apt/keyrings/adoptium.asc &&
+          echo "deb [signed-by=/etc/apt/keyrings/adoptium.asc] https://packages.adoptium.net/artifactory/deb jammy main" | sudo tee /etc/apt/sources.list.d/packages_adoptium_net_artifactory_deb.list &&
+          sudo apt-get update &&
+          sudo apt-get install -y
+          build-essential
+          libfreetype6-dev
+          libcups2-dev
+          libx11-dev libxext-dev libxrender-dev libxrandr-dev libxtst-dev libxt-dev
+          libasound2-dev
+          libffi-dev
+          autoconf
+          zip
+          unzip
+          libfontconfig1-dev
+          temurin-21-jdk
+          qemu-user qemu-user-static debootstrap
+          binutils-aarch64-linux-gnu
+          cpp-aarch64-linux-gnu g++-aarch64-linux-gnu
+          gcc-aarch64-linux-gnu
+      - name: ARM64 sysroot
+        run: sudo debootstrap --verbose --components=main,universe --arch=arm64 --include=fakeroot,symlinks,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev,libffi-dev --resolve-deps jammy ./sysroot-aarch64 http://ports.ubuntu.com/ubuntu-ports/
+      - name: Fix up symlinks
+        run: sudo chroot ./sysroot-aarch64 symlinks -cr .
+      - name: Configure OpenJDK
+        run: sh configure --openjdk-target=aarch64-linux-gnu --disable-warnings-as-errors --with-sysroot=../sysroot-aarch64/ --with-debug-level=${{ matrix.debug-level }} --with-jvm-variants=${{ matrix.variant }}
+        working-directory: ./jdk-mmtk
+      - name: Build OpenJDK
+        run: make CONF=linux-aarch64-${{ matrix.variant }}-${{ matrix.debug-level }} product-bundles
+        working-directory: ./jdk-mmtk
+        if: ${{ matrix.third-party-heap == '' }}
+      - name: Build OpenJDK Third Party Heap
+        run: make CONF=linux-aarch64-${{ matrix.variant }}-${{ matrix.debug-level }} THIRD_PARTY_HEAP=$PWD/../mmtk-openjdk/openjdk product-bundles
+        working-directory: ./jdk-mmtk
+        if: ${{ matrix.third-party-heap == '-tph' }}
+      - name: Upload as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: aarch64-${{ matrix.variant }}-${{ matrix.debug-level }}${{ matrix.third-party-heap }}-bundles
+          path: ./jdk-mmtk/build/linux-aarch64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*
+      - name: Find bundle file
+        id: find-file
+        run: echo "bundle-name=$(ls ./jdk-mmtk/build/linux-aarch64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*.tar.gz | grep -v -e symbols -e demos)" >> $GITHUB_OUTPUT
+      - name: Upload bundle
+        run: >
+          curl $(curl -Ls -o /dev/null -w %{url_effective} -X PUT
+          --header "CF-Access-Client-Id: ${{ secrets.CF_ACCESS_CLIENT_ID }}"
+          --header "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}"
+          https://mmtk-nightly.zcai.org/api/upload/mmtk-openjdk-mainline/mmtk-openjdk-aarch64-${{ matrix.variant }}${{ matrix.third-party-heap }}-${{ matrix.debug-level }}.tar.gz)
+          --upload-file ${{ steps.find-file.outputs.bundle-name }}
   build-x86:
     strategy:
       matrix:
