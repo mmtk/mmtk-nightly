@@ -41,7 +41,9 @@ jobs:
           cpp-riscv64-linux-gnu g++-riscv64-linux-gnu
           gcc-riscv64-linux-gnu gcc-riscv64-unknown-elf
       - name: RISC-V sysroot
-        run: sudo debootstrap --verbose --arch=riscv64 --include=fakeroot,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev,libffi-dev --resolve-deps jammy ./sysroot-riscv64 http://ports.ubuntu.com/ubuntu-ports/
+        run: sudo debootstrap --verbose --components=main,universe --arch=riscv64 --include=fakeroot,symlinks,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev,libffi-dev --resolve-deps jammy ./sysroot-riscv64 http://ports.ubuntu.com/ubuntu-ports/
+      - name: Fix up symlinks
+        run: sudo chroot ./sysroot-riscv64 symlinks -cr .
       - name: Configure OpenJDK
         run: sh configure --disable-warnings-as-errors --with-debug-level=${{ matrix.debug-level }} --with-jvm-variants=${{ matrix.variant }} --openjdk-target=riscv64-linux-gnu --with-sysroot=../sysroot-riscv64/
         working-directory: ./jdk
@@ -149,7 +151,9 @@ jobs:
           cpp-aarch64-linux-gnu g++-aarch64-linux-gnu
           gcc-aarch64-linux-gnu
       - name: ARM64 sysroot
-        run: sudo debootstrap --verbose --arch=arm64 --include=fakeroot,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev,libffi-dev --resolve-deps jammy ./sysroot-aarch64 http://ports.ubuntu.com/ubuntu-ports/
+        run: sudo debootstrap --verbose --components=main,universe --arch=arm64 --include=fakeroot,symlinks,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev,libffi-dev --resolve-deps jammy ./sysroot-aarch64 http://ports.ubuntu.com/ubuntu-ports/
+      - name: Fix up symlinks
+        run: sudo chroot ./sysroot-aarch64 symlinks -cr .
       - name: Configure OpenJDK
         run: sh configure --disable-warnings-as-errors --with-debug-level=${{ matrix.debug-level }} --with-jvm-variants=${{ matrix.variant }} --openjdk-target=aarch64-linux-gnu --with-sysroot=../sysroot-aarch64/
         working-directory: ./jdk
