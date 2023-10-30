@@ -1,7 +1,7 @@
 name: 'Build GitHub mmtk/jdk'
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
   schedule:
     - cron: '0 0 * * *' # daily at 00:00
 
@@ -12,7 +12,10 @@ jobs:
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
         third-party-heap: ["", "-tph"]
-        variant: ["server", "zero"]
+        variant: ["server"]
+        include:
+          - variant: zero
+            debug-level: slowdebug
     name: mmtk/jdk riscv64
     runs-on: ubuntu-22.04
     steps:
@@ -94,7 +97,10 @@ jobs:
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
         third-party-heap: ["", "-tph"]
-        variant: ["server", "zero"]
+        variant: ["server"]
+        include:
+          - variant: zero
+            debug-level: slowdebug
     name: mmtk/jdk aarch64
     runs-on: ubuntu-22.04
     steps:
@@ -176,7 +182,10 @@ jobs:
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
         third-party-heap: ["", "-tph"]
-        variant: ["server", "zero"]
+        variant: ["server"]
+        include:
+          - variant: zero
+            debug-level: slowdebug
     name: mmtk/jdk x86_64
     runs-on: ubuntu-22.04
     steps:

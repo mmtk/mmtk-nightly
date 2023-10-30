@@ -1,7 +1,7 @@
 name: 'Build GitHub openjdk/jdk'
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
   schedule:
     - cron: '0 0 * * *' # daily at 00:00
 
@@ -11,7 +11,10 @@ jobs:
       fail-fast: false
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
-        variant: ["server", "zero"]
+        variant: ["server"]
+        include:
+          - variant: zero
+            debug-level: slowdebug
     name: openjdk/jdk riscv64
     runs-on: ubuntu-22.04
     steps:
@@ -71,7 +74,10 @@ jobs:
       fail-fast: false
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
-        variant: ["server", "zero"]
+        variant: ["server"]
+        include:
+          - variant: zero
+            debug-level: slowdebug
     name: openjdk/jdk x86_64
     runs-on: ubuntu-22.04
     steps:
@@ -123,7 +129,10 @@ jobs:
       fail-fast: false
       matrix:
         debug-level: ["slowdebug", "fastdebug", "release"]
-        variant: ["server", "zero"]
+        variant: ["server"]
+        include:
+          - variant: zero
+            debug-level: slowdebug
     name: openjdk/jdk aarch64
     runs-on: ubuntu-22.04
     steps:
