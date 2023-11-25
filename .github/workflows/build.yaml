@@ -14,8 +14,12 @@ jobs:
         third-party-heap: ["", "-tph"]
         variant: ["server"]
         include:
+          - variant: zero # this overrides `variant` in the original matrix combinations, so is added as an additional matrix combination
+            debug-level: slowdebug
+            third-party-heap: ""
           - variant: zero
             debug-level: slowdebug
+            third-party-heap: "-tph"
     name: mmtk/jdk riscv64
     runs-on: ubuntu-22.04
     steps:
@@ -101,6 +105,10 @@ jobs:
         include:
           - variant: zero
             debug-level: slowdebug
+            third-party-heap: ""
+          - variant: zero
+            debug-level: slowdebug
+            third-party-heap: "-tph"
     name: mmtk/jdk aarch64
     runs-on: ubuntu-22.04
     steps:
@@ -186,6 +194,10 @@ jobs:
         include:
           - variant: zero
             debug-level: slowdebug
+            third-party-heap: ""
+          - variant: zero
+            debug-level: slowdebug
+            third-party-heap: "-tph"
     name: mmtk/jdk x86_64
     runs-on: ubuntu-22.04
     steps:
