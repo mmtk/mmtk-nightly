@@ -157,7 +157,7 @@ jobs:
           zip
           unzip
           libfontconfig1-dev
-          temurin-21-jdk
+          temurin-22-jdk
           qemu-user qemu-user-static debootstrap
           binutils-aarch64-linux-gnu
           cpp-aarch64-linux-gnu g++-aarch64-linux-gnu
