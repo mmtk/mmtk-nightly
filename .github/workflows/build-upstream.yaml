@@ -39,7 +39,7 @@ jobs:
           zip
           unzip
           libfontconfig1-dev
-          temurin-21-jdk
+          temurin-22-jdk
           qemu-user qemu-user-static debootstrap
           binutils-riscv64-linux-gnu binutils-riscv64-unknown-elf
           cpp-riscv64-linux-gnu g++-riscv64-linux-gnu
@@ -102,7 +102,7 @@ jobs:
           zip
           unzip
           libfontconfig1-dev
-          temurin-21-jdk
+          temurin-22-jdk
       - name: Configure OpenJDK
         run: sh configure --disable-warnings-as-errors --with-debug-level=${{ matrix.debug-level }} --with-jvm-variants=${{ matrix.variant }}
         working-directory: ./jdk
