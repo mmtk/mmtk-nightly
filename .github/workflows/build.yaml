@@ -81,7 +81,7 @@ jobs:
         working-directory: ./jdk-mmtk
         if: ${{ matrix.third-party-heap == '-tph' }}
       - name: Upload as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: riscv64-${{ matrix.variant }}-${{ matrix.debug-level }}${{ matrix.third-party-heap }}-bundles
           path: ./jdk-mmtk/build/linux-riscv64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*
@@ -170,7 +170,7 @@ jobs:
         working-directory: ./jdk-mmtk
         if: ${{ matrix.third-party-heap == '-tph' }}
       - name: Upload as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: aarch64-${{ matrix.variant }}-${{ matrix.debug-level }}${{ matrix.third-party-heap }}-bundles
           path: ./jdk-mmtk/build/linux-aarch64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*
@@ -246,7 +246,7 @@ jobs:
         working-directory: ./jdk-mmtk
         if: ${{ matrix.third-party-heap == '-tph' }}
       - name: Upload as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: x86_64-${{ matrix.variant }}-${{ matrix.debug-level }}${{ matrix.third-party-heap }}-bundles
           path: ./jdk-mmtk/build/linux-x86_64-${{ matrix.variant }}-${{ matrix.debug-level }}/bundles/*

@@ -1,7 +1,7 @@
 name: 'Build GitHub mmtk/openjdk'
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
   schedule:
     - cron: '0 0 * * *' # daily at 00:00
 
@@ -61,7 +61,7 @@ jobs:
         working-directory: ./openjdk
         if: ${{ matrix.third-party-heap == '-tph' }}
       - name: Upload as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: x86_64-server-${{ matrix.debug-level }}${{ matrix.third-party-heap }}-bundles
           path: ./openjdk/build/linux-x86_64-normal-server-${{ matrix.debug-level }}/bundles/*
