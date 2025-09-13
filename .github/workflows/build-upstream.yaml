@@ -67,7 +67,7 @@ jobs:
           curl $(curl -Ls -o /dev/null -w %{url_effective} -X PUT
           --header "CF-Access-Client-Id: ${{ secrets.CF_ACCESS_CLIENT_ID }}"
           --header "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}"
-          https://mmtk-nightly.zcai.org/api/upload/openjdk-jdk/openjdk-jdk-riscv64-${{ matrix.variant }}-${{ matrix.debug-level }}.tar.gz)
+          https://nightly.mmtk.io/api/upload/openjdk-jdk/openjdk-jdk-riscv64-${{ matrix.variant }}-${{ matrix.debug-level }}.tar.gz)
           --upload-file ${{ steps.find-file.outputs.bundle-name }}
   build-x86:
     strategy:
@@ -122,7 +122,7 @@ jobs:
           curl $(curl -Ls -o /dev/null -w %{url_effective} -X PUT
           --header "CF-Access-Client-Id: ${{ secrets.CF_ACCESS_CLIENT_ID }}"
           --header "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}"
-          https://mmtk-nightly.zcai.org/api/upload/openjdk-jdk/openjdk-jdk-x86_64-${{ matrix.variant }}-${{ matrix.debug-level }}.tar.gz)
+          https://nightly.mmtk.io/api/upload/openjdk-jdk/openjdk-jdk-x86_64-${{ matrix.variant }}-${{ matrix.debug-level }}.tar.gz)
           --upload-file ${{ steps.find-file.outputs.bundle-name }}
   build-aarch64:
     strategy:
@@ -185,5 +185,5 @@ jobs:
           curl $(curl -Ls -o /dev/null -w %{url_effective} -X PUT
           --header "CF-Access-Client-Id: ${{ secrets.CF_ACCESS_CLIENT_ID }}"
           --header "CF-Access-Client-Secret: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}"
-          https://mmtk-nightly.zcai.org/api/upload/openjdk-jdk/openjdk-jdk-aarch64-${{ matrix.variant }}-${{ matrix.debug-level }}.tar.gz)
+          https://nightly.mmtk.io/api/upload/openjdk-jdk/openjdk-jdk-aarch64-${{ matrix.variant }}-${{ matrix.debug-level }}.tar.gz)
           --upload-file ${{ steps.find-file.outputs.bundle-name }}
